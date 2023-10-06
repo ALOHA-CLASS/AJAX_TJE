@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <form action="" enctype="application/x-www-form-urlencoded"></form>
+    <form action="" enctype="multipart/form-data">
+        <input type="file" name="file" id="file" multiple>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script>
+
+        // AJAX 
+        // 요청 메시지
+        // - method
+        // - data
+        // - contentType
+        let url = 'http://192.168.30.119:8080/api/test'
+        let data = {
+            name : '김조은',
+        }
+
+        let formData = new FormData()
+        formData.append('name', '김조은')
+        // 파일 가져오기
+        let file = $('#file')[0]        // 파일 정보
+        let files = file.files          // files : 파일 데이터 목록
+        for (let i = 0; i < files.length; i++) {
+            formData.append('file', files[i])
+        }
+
+        $.ajax({
+            url         : url,                  // 요청 경로 
+            type        : 'POST',                // GET, POST, PUT, DELETE
+            data        :  data,                // 요청 데이터
+            // contentType : '',                // 요청 컨텐츠 형식
+            // contentType  : application/x-www-form-urlencoded(기본값)
+            // contentType  : applcation/json, applcation/xml,
+            // contentType  : multipart/form-data,
+            // dataType    : '',                 // 응답 데이터 타입
+            // dataType     : 'text', 'json', 'xml', 'html'
+            // 응답 성공 시, 실행할 함수
+            success     : complete,
+            // 응답 실패 시, 실행할 함수
+            error       : fail,
+        })
+
+        // 응답 성공 시, 함수의 매개변수
+        // 1 : 응답 데이터
+        // 2 : 응답 상태 코드
+        // 3 : 요청 객체
+        function complete(response, status, request) {
+            console.log(response);
+            console.log(status);
+            console.log(request);
+        }
+        
+        // 응답 실패 시, 함수의 매개변수
+        // 1 : 요청 객체
+        // 2 : 상태
+        // 3 : 에러 정보 객체
+        function fail(request, status, error) {
+            console.log(request);
+            console.log(status);
+            console.log(error);
+        }
+
+        // $ajax('/api/test', 'GET', data, 'application/json')
+        function $ajax(url, method, data, contentType='') {
+            $.ajax({
+                url         : url,                  // 요청 경로 
+                type        : method,               // GET, POST, PUT, DELETE
+                data        : data,                 // 요청 데이터
+                contentType : contentType,          // 요청 컨텐츠 형식
+                success     : function(response) {
+                    alert(response)
+                },
+                error       : function(request) {
+                    console.log(request);
+                }
+            })
+        }
+    </script>
+</body>
+</html>

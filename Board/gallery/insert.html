@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>갤러리 등록</title>
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <!-- 사이드 바 -->
+    <aside id="sidebar">
+        <div class="top flex main-end">
+            <a href="javascript:;" id="btn-close">
+                <span>close</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../board/list.html">Board</a></li>
+            <li><a href="../gallery/list.html">Gallery</a></li>
+        </ul>
+    </aside>
+
+    <!-- 헤더 -->
+    <header>
+        <!-- 로그인 | 회원가입 -->
+        <div class="util"></div>
+
+        <!-- 메인 메뉴 -->
+        <div class="menu">
+            <nav>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../board/list.html">Board</a></li>
+                    <li><a href="../gallery/list.html">Gallery</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 -->
+    <section class="main container">
+        <div class="inner">
+            <!-- 제목 영역 -->
+            <div class="main-title">
+                <h1>갤러리 등록</h1>
+                <p>커뮤니티 갤러리 등록을 요청합니다.<p>
+            </div>
+
+            <!-- 갤러리 입력 -->
+             <!-- 요청 데이터에 file 이 있다면, 인코딩을 하지 않도록
+                 enctype="multipart/form-data" 로 설정해준다.
+             -->
+            <form action="http://192.168.30.119:8080/api/board" method="post" enctype="multipart/form-data">
+                <table class="board">
+                    <tr>
+                        <td class="label">썸네일</td>
+                        <td class="data">
+                            <div class="dropzone">
+                                <input type="file" id="thumbnail" accept="image/*">
+                                <a href="javascript:;" class="btn btn-sm btn-thumb-remove hide">삭제</a>
+                                <div class="drop-img flex col main-center sub-center">
+                                    <div class="upload-box">
+                                        <h3 class="mb-20">이미지를 드래그 하세요.</h3>
+                                        <label for="thumbnail" class="btn">업로드</label>
+                                    </div>
+                                    <div class="img-box hide"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">제목</td>
+                        <td class="data">
+                            <input type="text" name="title" id="title" class="input-text">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">작성자</td>
+                        <td class="data">
+                            <input type="text" name="writer" id="writer" class="input-text">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">내용</td>
+                        <td class="data">
+                            <textarea name="content" id="content" cols="30" rows="10" 
+                                      class="input-textarea"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">파일</td>
+                        <td class="data">
+                            <input type="file" name="file" id="file" multiple>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="btn-box">
+                    <div class="item">
+                        <a href="list.html" class="btn">목록</a>
+                    </div>
+                    <div class="item">
+                        <a href="javascript:;" class="btn" id="btn-insert">등록</a>
+                        <input type="submit" class="btn" value="등록">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- script -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script>
+
+        // 등록 버튼 - 클릭 이벤트
+        $('#btn-insert').on('click', function() {
+            // alert('등록')
+
+            // 등록 요청
+            let formData = new FormData()       // 폼 데이터 객체
+
+            let title = $('#title').val()
+            let writer = $('#writer').val()
+            let content = $('#content').val()
+
+            // 파일 입력 가져오기
+            let file = $('#file')[0]
+            let files = file.files
+            // console.log('file ----------------------------');
+            // console.log($('#file'));
+
+            formData.append('title', title)
+            formData.append('writer', writer)
+            formData.append('content', content)
+
+            // 파일 데이터 추가
+            for (let i = 0; i < files.length; i++) {
+                formData.append('file[]', files[i])
+            }
+
+
+            let data = {
+                'title' : title,
+                'writer' : writer,
+                'content' : content,
+            }
+
+            let url = 'http://192.168.30.119:8080/api/board'
+            $.ajax({
+                url             :   url,
+                type            :   'GET',
+                data            :   formData,
+                contentType     :   false,
+                processData     :   false,      // 데이터 컨텐츠 타입 자동 변환 여부
+                                                // 기본값(true) 
+                                                // true  -> contentType  : application/x-www-form-urlencoded
+                                                // false -> contentType  : 데이터를 자동으로 처리하지 않고 직접 지정
+                success         : function(response) {
+                    if( response == 'SUCCESS' ){
+                        alert('등록이 완료되었습니다.')
+                        // 목록 페이지로 이동
+                        location.href = 'list.html'
+                    }
+                },
+                error           : function(request, status, error){
+                    alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                }
+
+            })
+
+
+        })
+
+    </script>
+
+    <script>
+
+        let fileList = null
+
+        // 드랍존에 이미지를 올렸을 때
+        $('.dropzone').on('dragover', function(e) {
+            e.preventDefault() // 이벤트의 기본 액션 방지
+
+            $(this).addClass('over')
+        })
+
+        // 드랍존에 이미지를 벗어날 때
+        $('.dropzone').on('dragleave', function(e) {
+            e.preventDefault() // 이벤트의 기본 액션 방지
+
+            $(this).removeClass('over')
+        })
+
+        // 드랍존에 이미지를 놓았을 때
+        $('.dropzone').on('drop', function(e) {
+            e.preventDefault() // 이벤트의 기본 액션 방지
+            $(this).removeClass('over')
+            
+            console.log(e);
+
+            fileList = e.originalEvent.dataTransfer.files
+
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList[i];
+
+                let reader = new FileReader()
+
+                // 파일 로드 시
+                reader.onload = function(event) {
+                    let source =  event.target.result   // 파일 데이터
+                    let img = `<img src="${source}" >`
+                    $('.btn-thumb-remove').show()               // 삭제 버튼 보여주기
+                    $('.drop-img .img-box').show().html(img)    // 이미지 보여주기
+                    $('.drop-img .upload-box').hide()           // 업로드 영역 숨김
+
+                }
+                reader.readAsDataURL(file)
+            }
+
+        })
+
+        // 썸네일 삭제 - 클릭 이벤트
+        $('.btn-thumb-remove').on('click', function() {
+            $('#thumbnail').val(null)       // 등록 파일정보 제거
+            $('.upload-box').show()         // 업로드 영역 보여주기
+            $('.img-box').empty().hide()    // 썸네일 숨김
+            $('.btn-thumb-remove').hide()   // 삭제 버튼 숨김
+        })
+
+
+        // 등록 버튼 - 클릭 이벤트
+        $('#btn-insert').on('click', function() {
+
+            // 등록 요청
+            const url = 'http://192.168.30.119:8080/api/gallery'
+
+            let formData = new FormData()
+
+            let title = $('#title').val()
+            let writer = $('#writer').val()
+            let content = $('#content').val()
+
+            let file = $('#file')[0]
+            let files = file.files
+
+            formData.append('title', title)
+            formData.append('writer', writer)
+            formData.append('content', content)
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append('file[]', files[i])
+            }
+
+            // 썸네일 파일 formData 추가
+            if( fileList != null )
+                formData.append("thumbnail[]", fileList[0])   // 썸네일 1개
+
+            $.ajax({
+                url : url,
+                type : 'post',
+                data : formData,            
+                contentType     : false,    
+                processData     : false,    
+                success : function(response) {
+                    // alert(response)
+                    if( response == 'SUCCESS' ) {
+                        alert('등록이 완료되었습니다.')
+                        // 목록 페이지로 이동
+                        location.href = 'list.html'
+                    }
+                    
+                },
+                error : function(error) {
+
+                }
+            })
+
+
+        })
+
+
+        // 파일 변경 이벤트
+        $('#thumbnail').on('change', function(e) {
+            fileList = e.target.files       // 변경된 파일 목록
+
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList[i];
+
+                let reader = new FileReader() 
+
+                // 파일 로드 시
+                reader.onload = function(event) {
+                    let source =  event.target.result   // 파일 데이터
+                    let img = `<img src="${source}" >`
+                    $('.btn-thumb-remove').show()
+                    $('.drop-img .img-box').show().html(img)
+                    $('.drop-img .upload-box').hide()
+                }
+                
+                reader.readAsDataURL(file)
+            }
+        })
+
+
+    </script>
+
+</body>
+</html>

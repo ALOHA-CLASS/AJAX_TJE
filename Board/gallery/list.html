@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>갤러리</title>
+    <!-- reset -->
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <!-- 사이드바 -->
+    <aside id="sidebar">
+        <div class="top flex main-end">
+            <a href="javascript:;" id="btn-close">
+                <span>close</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../board/list.html">Board</a></li>
+            <li><a href="../gallery/list.html">Gallery</a></li>
+        </ul>
+    </aside>
+
+    <!-- 헤더 -->
+    <header>
+        <!-- 로그인 | 회원가입 -->
+        <div class="util"></div>
+
+        <!-- 메인 메뉴 -->
+        <div class="menu">
+            <nav>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../board/list.html">Board</a></li>
+                    <li><a href="../gallery/list.html">Gallery</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 -->
+    <section class="main container">
+        <div class="inner">
+            <!-- 제목 영역 -->
+            <div class="main-title">
+                <h1>갤러리</h1>
+                <p>커뮤니티 갤러리 데이터를 조회합니다.</p>
+            </div>
+
+            <div class="flex main-end mb-40">
+                <a href="insert.html" class="btn">등록</a>
+            </div>
+
+
+            <!-- 갤러리 영역 -->
+            <div id="gallery-list" class="grid col-4 col-md-3 col-sm-2 col-xs-1 col-gap-20 row-gap-20">
+                <!-- item -->
+                <!-- 
+                <div class="item">
+                    <div class="card round">
+                        <div class="img-box">
+                            <a href="#">
+                                <img src="../img/sample.jpg" alt="sample">
+                            </a>
+                        </div>
+                        <div class="content-box flex col">
+                            <div class="item">
+                                <h3 class="title">제목</h3>
+                            </div>
+                            <div class="item">
+                                <div class="flex main-space-between">
+                                    <span class="writer">작성자</span>
+                                    <span class="date">2023-10-06</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                -->
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+    <!-- script -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script>
+
+        let page = 1        // 현재 페이지 번호
+        let rows = 20       // 페이지당 게시글 수
+        let lastPage = 1    // 마지막 페이지 번호
+
+        getPage()           // 페이지 정보 요청
+        getList()           // 갤러리 목록 요청
+
+        // 갤러리 목록 
+        function getList() {
+
+            const url = 'http://192.168.30.119:8080/api/gallery'
+
+            let data = {
+                pageNo : page,
+                rows : rows,
+            }
+
+            $.ajax({
+                url : url,
+                type : 'GET',
+                data : data,
+                success : function(response) {
+                    let galleryList = response
+
+                    let galleryData = ''
+                    let fileUrl = 'http://192.168.30.119:8080/api/file'
+
+                    for (let i = 0; i < galleryList.length; i++) {
+                        let gallery = galleryList[i];
+
+                        const date = new Date(gallery.regDate)
+                        const regDate = date.toISOString().split("T")[0]
+
+                        // http://192.168.30.119:8080/api/file/img?fileNo=1
+                        let item = `<div class="item">
+                                        <div class="card round">
+                                            <div class="img-box">
+                                                <a href="./read.html?galleryNo=${gallery.galleryNo}">
+                                                    <img src="${fileUrl}/img?fileNo=${gallery.fileNo}" alt="1">
+                                                </a>
+                                            </div>
+                                            <div class="content-box flex col">
+                                                <div class="item">
+                                                    <h3 class="title txt-over">${gallery.title}</h3>
+                                                </div>
+                                                <div class="item">
+                                                    <div class="flex main-space-between">
+                                                        <span class="writer txt-over w-30p">${gallery.writer}</span>
+                                                        <span class="date">${regDate}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="item"></div>
+                                            </div>
+                                        </div>
+                                    </div>`
+
+                        galleryData += item
+                    }
+
+                    // $('#gallery-list').html(galleryData)
+                    $('#gallery-list').append(galleryData)
+                },
+                error : function(error) {
+
+                }
+            })
+
+        }
+
+        // 스크롤 이벤트 - 인피니티 스크롤 UI
+        $(window).scroll(function() {
+            // console.log('스크롤');
+            let scrollTop = $(window).scrollTop()           // 스크롤 위치
+            let windowHeight = $(window).height()           // 브라우저 높이
+            let documentHeight = $(document).height()       // 문서 높이
+
+            console.log(`스크롤 : ${scrollTop}`);
+            console.log(`화면 높이 : ${windowHeight}`);
+            console.log(`문서 높이 : ${documentHeight}`);
+
+            if( scrollTop + windowHeight >= documentHeight ) {
+                // alert('스크롤 마지막 입니다.')
+
+                if( page < lastPage ) {
+                    page++
+                    getList()
+                }
+                else if( page == lastPage ) {
+                    page++
+                    alert('마지막 페이지입니다.')
+                }
+            }
+
+        })
+
+        // 페이지 정보 요청
+        function getPage() {
+
+            // 페이지 번호 정보
+            let data = {
+                pageNo : page,
+                rows : rows,
+            }
+
+            const url = 'http://192.168.30.119:8080/api/gallery/pagination'
+
+            $.ajax({
+                url : url,
+                type : 'get',
+                data : data,
+                success : function(response) {
+                    let pageInfo = response
+
+                    if( pageInfo == null )
+                        return
+                    
+                    lastPage = pageInfo.lastPage
+
+                },
+                error : function(error) {
+
+                }
+
+            })
+
+        }
+
+
+    </script>
+</body>
+</html>

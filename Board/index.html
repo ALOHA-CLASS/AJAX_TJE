@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 사이드 바 -->
+    <aside id="sidebar">
+        <div class="top flex main-end">
+            <a href="javascript:;" id="btn-close">
+                <span>close</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="board/list.html">Board</a></li>
+            <li><a href="gallery/list.html">Gallery</a></li>
+        </ul>
+    </aside>
+
+    <!-- 헤더 -->
+    <header>
+        <!-- 로그인 | 회원가입 -->
+        <div class="util"></div>
+
+        <!-- 메인 메뉴 -->
+        <div class="menu">
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="board/list.html">Board</a></li>
+                    <li><a href="gallery/list.html">Gallery</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 -->
+    <section class="main container">
+        <div class="inner">
+            <h2>게시판 프로젝트</h2>
+            <ul>
+                <li>게시판</li>
+                <li>갤러리</li>
+            </ul>
+            <div class="btn-box">
+                <a href="board/list.html" class="btn">게시글 목록</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- script -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>

@@ -12,7 +12,7 @@
     <aside id="sidebar">
         <div class="top flex main-end">
             <a href="javascript:;" id="btn-close">
-                <span>close</span>
+                <span class="material-symbols-outlined">close</span>
             </a>
         </div>
         <ul>
@@ -30,10 +30,18 @@
         <!-- 메인 메뉴 -->
         <div class="menu">
             <nav>
-                <ul>
+                <ul class="pc">
                     <li><a href="../index.html">Home</a></li>
                     <li><a href="../board/list.html">Board</a></li>
                     <li><a href="../gallery/list.html">Gallery</a></li>
+                </ul>
+                <ul class="mobile">
+                    <li>
+                        <a href="../index.html"><span class="material-symbols-outlined">home</span></a>
+                    </li>
+                    <li>
+                        <a href="javascript:;" id="btn-menu"><span class="material-symbols-outlined">menu</span></a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -85,6 +93,13 @@
                     <td class="label">내용</td>
                     <td class="data">
                         <p id="content"></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">파일</td>
+                    <td class="data">
+                        <!-- 파일 목록 -->
+                        <ul id="file-list"></ul>
                     </td>
                 </tr>
             </table>
@@ -148,6 +163,10 @@
 
     <!-- script -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="../js/main.js"></script>
 
     <script>
@@ -159,6 +178,7 @@
         
         if( boardNo != null ) {
             getBoard()
+            getFileList()
             getCommentList()
         }
 
@@ -192,7 +212,12 @@
                     $('#updDate').text(updDate + " / " + updTime)
                 },
                 error           : function(request, status, error){
-                    alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    // alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    Swal.fire(
+                        '에러!',
+                        'code:' + request.status,
+                        'error'
+                    )
                 }
 
             })
@@ -206,10 +231,33 @@
         // 삭제 버튼 - 클릭 이벤트
         $('.btn-delete').on('click', function() {
 
-            let check = confirm('정말로 삭제하시겠습니까?')
+            // sweetalert - confirm
+            Swal.fire({
+                title: '정말로 삭제하시겠습니까?',
+                text: "삭제하면 되돌릴 수 없습니다!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '예',
+                cancelButtonText: '아니오',
+            }).then((result) => {
+                // result.isConfirmed : true  [예]
+                // result.isConfirmed : false  [아니오]
+                if (result.isConfirmed) {
+                    deleteData()
+                    
+                }
+            })
+
+            // let check = confirm('정말로 삭제하시겠습니까?')
+            // if( !check ) 
+            //     return
             
-            if( !check ) 
-                return
+        })
+
+        // 게시글 삭제
+        function deleteData() {
 
             // 게시글 삭제 요청
             let url = 'http://192.168.30.119:8080/api/board'
@@ -221,23 +269,36 @@
             $.ajax({
                 url             :   url,
                 type            :   'DELETE',
-                data            :   JSON.stringify(data),
-                contentType     :   'application/json',
+                data            :   data,
                 dataType        :   'text',                 // 응답 컨텐츠 타입
                 success         : function(response, status) {
                     if( response == 'SUCCESS' ){
-                        alert('삭제가 완료되었습니다.')
-                        // 목록 페이지로 이동
-                        location.href = 'list.html'
+                        // alert('삭제가 완료되었습니다.')
+                        Swal.fire(
+                            '삭제 완료!',
+                            '게시글 삭제가 완료되었습니다.',
+                            'success'
+                        ).then((result) => {
+                            if( result.isConfirmed ) {
+                                // 목록 페이지로 이동
+                                location.href = 'list.html'
+                            }
+
+                        })
                     }
                 },
                 error           : function(request, status, error){
-                    alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    // alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    Swal.fire(
+                        '에러!',
+                        'code:' + request.status,
+                        'error'
+                    )
                 }
 
             })
-            
-        })
+
+        }
 
 
         
@@ -324,7 +385,8 @@
             const url = 'http://192.168.30.119:8080/api/comment'
 
             let data = {
-                'boardNo'   : boardNo,
+                'parentNo'   : boardNo,
+                'parentTable' : 'board',
                 'writer'    : writer,
                 'content'   : content,
             }
@@ -337,7 +399,12 @@
                     let result = response
 
                     if( result == 'SUCCESS' ) {
-                        alert('댓글 등록이 완료되었습니다.')
+                        // alert('댓글 등록이 완료되었습니다.')
+                        Swal.fire(
+                            '완료!',
+                            '댓글 등록이 완료되었습니다.',
+                            'success'
+                        )
                         // 댓글 목록 갱신
                         getCommentList()
 
@@ -348,7 +415,12 @@
                     }
                 },
                 error           : function(request, status, error){
-                    alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    // alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    Swal.fire(
+                        '에러!',
+                        'code:' + request.status,
+                        'error'
+                    )
                 }
             })
         }
@@ -431,14 +503,26 @@
                         success : function(response) {
                             let result = response
                             if( result == 'SUCCESS' ) {
-                                alert('댓글 수정이 완료되었습니다.')
+                                // alert('댓글 수정이 완료되었습니다.')
+
+                                Swal.fire(
+                                    '완료!',
+                                    '댓글 수정이 완료되었습니다.',
+                                    'success'
+                                )
+
                                 // 댓글 목록 갱신
                                 getCommentList()
                             }
 
                         },
                         error           : function(request, status, error){
-                            alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                            // alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                            Swal.fire(
+                                '에러!',
+                                'code:' + request.status,
+                                'error'
+                            )
                         }
                     })
 
@@ -450,15 +534,36 @@
             
             // 댓글 [삭제]
             $('.btn-comment-delete').on('click', function() {
-
-                let check = confirm('정말로 삭제하시겠습니까?')
-                if( !check )
-                    return
-
                 let commentNo = $(this).attr('data')
 
-                let url = 'http://192.168.30.119:8080/api/comment'
+                // let check = confirm('정말로 삭제하시겠습니까?')
+                // if( !check )
+                //     return
 
+                // sweetalert - confirm
+                Swal.fire({
+                    title: '정말로 삭제하시겠습니까?',
+                    text: "삭제하면 되돌릴 수 없습니다!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: '예',
+                    cancelButtonText: '아니오',
+                }).then((result) => {
+                    // result.isConfirmed : true  [예]
+                    // result.isConfirmed : false  [아니오]
+                    if (result.isConfirmed) {
+                        deleteCommentData(commentNo)
+                    }
+                })
+            })
+
+            // 댓글 삭제
+            function deleteCommentData(commentNo) {
+
+                
+                let url = 'http://192.168.30.119:8080/api/comment'
                 let data = {
                     commentNo   : commentNo,
                 }
@@ -470,18 +575,27 @@
                     success : function(response) {
                         let result = response
                         if( result == 'SUCCESS' ) {
-                            alert('댓글 삭제가 완료되었습니다.')
+                            // alert('댓글 삭제가 완료되었습니다.')
+                            Swal.fire(
+                                '완료!',
+                                '댓글 삭제가 완료되었습니다.',
+                                'success'
+                            )
                             // 댓글 목록 갱신
                             getCommentList()
                         }
 
                     },
                     error           : function(request, status, error){
-                        alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                        // alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                        Swal.fire(
+                            '에러!',
+                            'code:' + request.status,
+                            'error'
+                        )
                     }
                 })
-
-            })
+            }
             
             // 댓글 [답글]
             $('.btn-comment').on('click', function() {
@@ -491,7 +605,7 @@
                 $('.edit-box').empty()
 
                 // 부모 댓글 번호
-                let parentNo = $(this).attr('data')
+                let superNo = $(this).attr('data')
 
                 // 답글 작성 UI 추가
                 let replyBox 
@@ -532,7 +646,9 @@
                     let url = 'http://192.168.30.119:8080/api/comment/reply'
 
                     let data = {
-                        parentNo : parentNo,                          // 부모 댓글번호
+                        parentTable : 'board',
+                        parentNo : boardNo,
+                        superNo : superNo,                          // 부모 댓글번호
                         writer : $('#input-reply-writer').val(),     
                         content : $('#input-reply-content').val(), 
                     }
@@ -545,7 +661,13 @@
                             let result = response
 
                             if( result == 'SUCCESS' ) {
-                                alert('답글 등록이 완료되었습니다.')
+                                // alert('답글 등록이 완료되었습니다.')
+                                Swal.fire(
+                                    '완료!',
+                                    '답글 등록이 완료되었습니다.',
+                                    'success'
+                                )
+
                                 // 댓글 목록 갱신
                                 getCommentList()
                             }
@@ -569,7 +691,45 @@
         }
 
 
-        
+        // 파일 목록 조회
+        function getFileList() {
+
+            const url = 'http://192.168.30.119:8080/api/board/file?boardNo=' + boardNo
+
+            $.ajax({
+                url : url,
+                type : 'get',
+                success : function(response) {
+                    let fileList = response
+                    console.log(fileList)
+
+                    let fileListData = ''
+                    let fileUrl = 'http://192.168.30.119:8080/api/file'
+                    for (let i = 0; i < fileList.length; i++) {
+                        let fileNo = fileList[i].fileNo
+                        let fileName = fileList[i].fileName     // UID_강아지.png
+                        let originName = fileList[i].originName // 원본파일명
+                        let filePath = fileList[i].filePath
+
+                        let li = `<li>
+                                    <p>
+                                        <img src="${fileUrl}/img?fileNo=${fileNo}" style="width:240px" />
+                                    </p>
+                                    <span>${originName}</span>
+                                    <a href="${fileUrl}/${fileNo}">[다운로드]</a>
+                                </li>  
+                                `
+                        fileListData += li
+                    }
+
+                    $('#file-list').html(fileListData)
+
+                },
+                error : function(error) {
+
+                }
+            })
+        }        
 
 
 

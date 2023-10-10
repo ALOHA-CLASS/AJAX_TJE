@@ -10,11 +10,11 @@
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <!-- 사이드바 -->
+    <!-- 사이드 바 -->
     <aside id="sidebar">
         <div class="top flex main-end">
             <a href="javascript:;" id="btn-close">
-                <span>close</span>
+                <span class="material-symbols-outlined">close</span>
             </a>
         </div>
         <ul>
@@ -32,10 +32,18 @@
         <!-- 메인 메뉴 -->
         <div class="menu">
             <nav>
-                <ul>
+                <ul class="pc">
                     <li><a href="../index.html">Home</a></li>
                     <li><a href="../board/list.html">Board</a></li>
                     <li><a href="../gallery/list.html">Gallery</a></li>
+                </ul>
+                <ul class="mobile">
+                    <li>
+                        <a href="../index.html"><span class="material-symbols-outlined">home</span></a>
+                    </li>
+                    <li>
+                        <a href="javascript:;" id="btn-menu"><span class="material-symbols-outlined">menu</span></a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -91,6 +99,12 @@
 
     <!-- script -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="../js/main.js"></script>
+
     <script>
 
         let page = 1        // 현재 페이지 번호
@@ -182,7 +196,12 @@
                 }
                 else if( page == lastPage ) {
                     page++
-                    alert('마지막 페이지입니다.')
+                    // alert('마지막 페이지입니다.')
+                    Swal.fire(
+                        '알림!',
+                        '마지막 페이지입니다.',
+                        'warning'
+                    )
                 }
             }
 

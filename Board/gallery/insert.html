@@ -6,13 +6,15 @@
     <title>갤러리 등록</title>
     <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="../css/style.css">
+    <!-- summernote -->
+    <link rel="stylesheet" href="../css/summernote-lite.min.css">
 </head>
 <body>
     <!-- 사이드 바 -->
     <aside id="sidebar">
         <div class="top flex main-end">
             <a href="javascript:;" id="btn-close">
-                <span>close</span>
+                <span class="material-symbols-outlined">close</span>
             </a>
         </div>
         <ul>
@@ -30,10 +32,18 @@
         <!-- 메인 메뉴 -->
         <div class="menu">
             <nav>
-                <ul>
+                <ul class="pc">
                     <li><a href="../index.html">Home</a></li>
                     <li><a href="../board/list.html">Board</a></li>
                     <li><a href="../gallery/list.html">Gallery</a></li>
+                </ul>
+                <ul class="mobile">
+                    <li>
+                        <a href="../index.html"><span class="material-symbols-outlined">home</span></a>
+                    </li>
+                    <li>
+                        <a href="javascript:;" id="btn-menu"><span class="material-symbols-outlined">menu</span></a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -57,6 +67,7 @@
                     <tr>
                         <td class="label">썸네일</td>
                         <td class="data">
+                            <!-- 썸네일 업로드 -->
                             <div class="dropzone">
                                 <input type="file" id="thumbnail" accept="image/*">
                                 <a href="javascript:;" class="btn btn-sm btn-thumb-remove hide">삭제</a>
@@ -103,7 +114,7 @@
                     </div>
                     <div class="item">
                         <a href="javascript:;" class="btn" id="btn-insert">등록</a>
-                        <input type="submit" class="btn" value="등록">
+                        <!-- <input type="submit" class="btn" value="등록"> -->
                     </div>
                 </div>
             </form>
@@ -112,69 +123,83 @@
 
     <!-- script -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- summernote -->
+    <script src="../js/summernote-lite.min.js"></script>
     <script src="../js/main.js"></script>
 
     <script>
+        var toolbar = [
+            // 글꼴 설정
+            ['fontname', ['fontname']],
+            // 글자 크기 설정
+            ['fontsize', ['fontsize']],
+            // 굵기, 기울임꼴, 밑줄,취소 선, 서식지우기
+            ['style', ['bold', 'italic', 'underline','strikethrough', 'clear']],
+            // 글자색
+            ['color', ['forecolor','color']],
+            // 표만들기
+            ['table', ['table']],
+            // 글머리 기호, 번호매기기, 문단정렬
+            ['para', ['ul', 'ol', 'paragraph']],
+            // 줄간격
+            ['height', ['height']],
+            // 그림첨부, 링크만들기, 동영상첨부
+            ['insert',['picture','link','video']],
+            // 코드보기, 확대해서보기, 도움말
+            ['view', ['codeview','fullscreen', 'help']]
+        ];
 
-        // 등록 버튼 - 클릭 이벤트
-        $('#btn-insert').on('click', function() {
-            // alert('등록')
+        var setting = {
+            height : 300,
+            minHeight : null,
+            maxHeight : null,
+            focus : true,
+            lang : 'ko-KR',
+            toolbar : toolbar,
+            callbacks : { 
 
-            // 등록 요청
-            let formData = new FormData()       // 폼 데이터 객체
-
-            let title = $('#title').val()
-            let writer = $('#writer').val()
-            let content = $('#content').val()
-
-            // 파일 입력 가져오기
-            let file = $('#file')[0]
-            let files = file.files
-            // console.log('file ----------------------------');
-            // console.log($('#file'));
-
-            formData.append('title', title)
-            formData.append('writer', writer)
-            formData.append('content', content)
-
-            // 파일 데이터 추가
-            for (let i = 0; i < files.length; i++) {
-                formData.append('file[]', files[i])
-            }
-
-
-            let data = {
-                'title' : title,
-                'writer' : writer,
-                'content' : content,
-            }
-
-            let url = 'http://192.168.30.119:8080/api/board'
-            $.ajax({
-                url             :   url,
-                type            :   'GET',
-                data            :   formData,
-                contentType     :   false,
-                processData     :   false,      // 데이터 컨텐츠 타입 자동 변환 여부
-                                                // 기본값(true) 
-                                                // true  -> contentType  : application/x-www-form-urlencoded
-                                                // false -> contentType  : 데이터를 자동으로 처리하지 않고 직접 지정
-                success         : function(response) {
-                    if( response == 'SUCCESS' ){
-                        alert('등록이 완료되었습니다.')
-                        // 목록 페이지로 이동
-                        location.href = 'list.html'
+                onImageUpload : function(files, editor, welEditable) {
+                    for (var i = files.length - 1; i >= 0; i--) {
+                        uploadImage(files[i], this);
                     }
-                },
-                error           : function(request, status, error){
-                    alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
                 }
+            }
+        };
 
+
+        $('#content').summernote(setting)
+
+        // 에디터 파일 업로드
+        function uploadImage(file, element) {
+            const fileUrl = 'http://192.168.30.119:8080/api/file'
+            const url = 'http://192.168.30.119:8080/api/file'
+
+            let formData = new FormData()
+            formData.append("file", file)
+
+            $.ajax({
+                url : url,
+                type : "post",
+                data : formData,
+                contentType : false,
+                processData : false,
+                success : function(response) {
+                    let fileNo = response
+                    // let img = `<img src="${fileUrl}/img/${fileNo}">`
+                    let imgUrl = `${fileUrl}/img?fileNo=${fileNo}`
+                    // 업로드된 이미지url 를 에디터에 추가
+                    $(element).summernote('editor.insertImage', imgUrl)
+                },
+                error : function(error) {
+
+                }
+                
             })
-
-
-        })
-
+        }
     </script>
 
     <script>
@@ -268,9 +293,17 @@
                 success : function(response) {
                     // alert(response)
                     if( response == 'SUCCESS' ) {
-                        alert('등록이 완료되었습니다.')
-                        // 목록 페이지로 이동
-                        location.href = 'list.html'
+                        // alert('등록이 완료되었습니다.')
+                        Swal.fire(
+                            '완료!',
+                            '등록이 완료되었습니다.',
+                            'success'
+                        ).then((result) => {
+                            if( result.isConfirmed ) {
+                                // 목록 페이지로 이동
+                                location.href = 'list.html'
+                            }
+                        })
                     }
                     
                 },

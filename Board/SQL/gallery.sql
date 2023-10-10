@@ -6,8 +6,9 @@ CREATE TABLE `gallery` (
   `content` text,
   `reg_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `upd_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `views` int DEFAULT '0',
   PRIMARY KEY (`gallery_no`)
-)  COMMENT='갤러리';
+) COMMENT='갤러리';
 
 
 

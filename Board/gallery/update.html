@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>갤러리 수정</title>
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <!-- summernote -->
+    <link rel="stylesheet" href="../css/summernote-lite.min.css">
+</head>
+<body>
+    <!-- 사이드 바 -->
+    <aside id="sidebar">
+        <div class="top flex main-end">
+            <a href="javascript:;" id="btn-close">
+                <span class="material-symbols-outlined">close</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../board/list.html">Board</a></li>
+            <li><a href="../gallery/list.html">Gallery</a></li>
+        </ul>
+    </aside>
+
+    <!-- 헤더 -->
+    <header>
+        <!-- 로그인 | 회원가입 -->
+        <div class="util"></div>
+
+        <!-- 메인 메뉴 -->
+        <div class="menu">
+            <nav>
+                <ul class="pc">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../board/list.html">Board</a></li>
+                    <li><a href="../gallery/list.html">Gallery</a></li>
+                </ul>
+                <ul class="mobile">
+                    <li>
+                        <a href="../index.html"><span class="material-symbols-outlined">home</span></a>
+                    </li>
+                    <li>
+                        <a href="javascript:;" id="btn-menu"><span class="material-symbols-outlined">menu</span></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="main container">
+        <div class="inner">
+            <!-- 제목 영역 -->
+            <div class="main-title">
+                <h1>갤러리 수정</h1>
+            </div>
+
+            <div class="btn-box">
+                <div class="item">
+                    <a href="list.html" class="btn">목록</a>
+                </div>
+                <div class="item">
+                    <a href="javascript:;" class="btn btn-update">수정</a>
+                    <a href="javascript:;" class="btn btn-delete">삭제</a>
+                </div>
+            </div>
+    
+            <!-- 갤러리 정보 -->
+            <table class="board">
+                <tr>
+                    <td class="label">썸네일</td>
+                    <td class="data">
+
+                        <!-- 썸네일 업로드 -->
+                        <div class="dropzone">
+                            <input type="file" id="thumbnail" accept="image/*">
+                            <a href="javascript:;" class="btn btn-sm btn-thumb-remove hide">삭제</a>
+                            <div class="drop-img flex col main-center sub-center">
+                                <div class="upload-box">
+                                    <h3 class="mb-20">이미지를 드래그 하세요.</h3>
+                                    <label for="thumbnail" class="btn">업로드</label>
+                                </div>
+                                <div class="img-box hide"></div>
+                            </div>
+                        </div>
+
+                        <!-- 썸네일 보기 -->
+                        <div id="gallery-img"></div>
+                        <div id="file-info"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">제목</td>
+                    <td class="data">
+                        <input type="text" name="title" id="title" class="input-text">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">작성자</td>
+                    <td class="data">
+                        <input type="text" name="writer" id="writer" class="input-text">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">내용</td>
+                    <td class="data">
+                        <textarea name="content" id="content" cols="30" rows="10" class="input-textarea"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">파일</td>
+                    <td class="data">
+                        <!-- 파일 등록 -->
+                        <input type="file" name="file" id="file" multiple>
+
+                        <!-- 파일 목록 -->
+                        <ul id="file-list"></ul>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="btn-box">
+                <div class="item">
+                    <a href="list.html" class="btn">목록</a>
+                </div>
+                <div class="item">
+                    <a href="javascript:;" class="btn btn-update">수정</a>
+                    <a href="javascript:;" class="btn btn-delete">삭제</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- summernote -->
+    <script src="../js/summernote-lite.min.js"></script>
+
+    <script src="../js/main.js"></script>
+
+    <script>
+        var toolbar = [
+            // 글꼴 설정
+            ['fontname', ['fontname']],
+            // 글자 크기 설정
+            ['fontsize', ['fontsize']],
+            // 굵기, 기울임꼴, 밑줄,취소 선, 서식지우기
+            ['style', ['bold', 'italic', 'underline','strikethrough', 'clear']],
+            // 글자색
+            ['color', ['forecolor','color']],
+            // 표만들기
+            ['table', ['table']],
+            // 글머리 기호, 번호매기기, 문단정렬
+            ['para', ['ul', 'ol', 'paragraph']],
+            // 줄간격
+            ['height', ['height']],
+            // 그림첨부, 링크만들기, 동영상첨부
+            ['insert',['picture','link','video']],
+            // 코드보기, 확대해서보기, 도움말
+            ['view', ['codeview','fullscreen', 'help']]
+        ];
+
+        var setting = {
+            height : 300,
+            minHeight : null,
+            maxHeight : null,
+            focus : true,
+            lang : 'ko-KR',
+            toolbar : toolbar,
+            callbacks : { 
+
+                onImageUpload : function(files, editor, welEditable) {
+                    for (var i = files.length - 1; i >= 0; i--) {
+                        uploadImage(files[i], this);
+                    }
+                }
+            }
+        };
+
+
+        $('#content').summernote(setting)
+
+        // 에디터 파일 업로드
+        function uploadImage(file, element) {
+            const fileUrl = 'http://192.168.30.119:8080/api/file'
+            const url = 'http://192.168.30.119:8080/api/file'
+
+            let formData = new FormData()
+            formData.append("file", file)
+
+            $.ajax({
+                url : url,
+                type : "post",
+                data : formData,
+                contentType : false,
+                processData : false,
+                success : function(response) {
+                    let fileNo = response
+                    // let img = `<img src="${fileUrl}/img/${fileNo}">`
+                    let imgUrl = `${fileUrl}/img?fileNo=${fileNo}`
+                    // 업로드된 이미지url 를 에디터에 추가
+                    $(element).summernote('editor.insertImage', imgUrl)
+                },
+                error : function(error) {
+
+                }
+                
+            })
+        }
+    </script>
+
+
+    <script>
+        // 현재 URL 가져오기
+        const urlParams = new URLSearchParams(location.search)
+        // ?galleryNo=100   (100 <-- 글번호 가져오기)
+        let galleryNo = urlParams.get('galleryNo')
+
+        /* 갤러리 정보 - 데이터 요청 */
+        if( galleryNo != null ) {
+            getGallery()
+            getFileList()
+            getCommentList()
+        }
+
+        // 댓글 목록 조회
+        function getCommentList() {
+
+            const url = 'http://192.168.30.119:8080/api/comment/'
+
+            let data = {
+                'galleryNo' : galleryNo
+            }
+
+
+            $.ajax({
+                url : url,
+                type : 'get',
+                success : function(response) {
+                    let commentList = response
+
+                    let commentData = ''
+                    for (let i = 0; i < commentList.length; i++) {
+                        let comment = commentList[i]
+
+                        let date = new Date(comment.regDate);
+                        let regDate = date.toISOString().split("T")[0];
+                        let regTime = date.toISOString().split("T")[1];
+                        regTime = regTime.split(".")[0]
+
+                        // 계층번호
+                        let depthNo = comment.depthNo
+
+                        let commentBox = `<div class="comment-box" style="margin-left: ${depthNo * 60}px;">
+                                            <div class="data-box">
+                                                <div class="top">
+                                                    <div class="item">
+                                                        <span class="comment-writer">${comment.writer}</span>
+                                                    </div>
+                                                    <div class="item">
+                                                        <a href="javascript:;" class="btn btn-sm btn-comment-update" data="${comment.commentNo}">수정</a>
+                                                        <a href="javascript:;" class="btn btn-sm btn-comment-delete" data="${comment.commentNo}">삭제</a>
+                                                    </div>
+                                                </div>
+                                                <div class="bottom">
+                                                    <p class="comment-content">${comment.content}</p>
+                                                    <div class="etc-box">
+                                                        <span class="comment-date">${regDate} ${regTime}</span>
+                                                        <a href="javascript:;" class="btn btn-sm btn-reply" data="${comment.commentNo}">답글</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="edit-box"></div>
+                                        </div>
+                                        `
+                        commentData += commentBox
+                    }
+
+                    $('#comment-list').html(commentData)
+
+                    // 이벤트 추가
+                    initCommentEvent()
+                    
+                },
+                error : function(error) {
+
+                }
+            })
+        }
+
+        // 댓글 [수정][삭제][답글] - 이벤트 추가
+        function initCommentEvent() {
+
+            // 댓글 [수정] 버튼 클릭 이벤트
+            $('.btn-comment-update').on('click', function() {
+
+                // 답글 작성 UI 초기화
+                $('.reply-box').remove()
+
+                // 작성자, 내용 
+                let btn = $(this)
+                let commentNo = btn.attr('data')        // 댓글번호
+                let commentBox = btn.parents('.comment-box')
+                let commentWriter = commentBox.find('.comment-writer')
+                let commentContent = commentBox.find('.comment-content')
+                let writer = commentWriter.text()
+                let content = commentContent.text()
+
+                // 수정 중인 다른 댓글 UI 초기화
+                $('.data-box').show()
+                $('.edit-box').empty()
+
+                // 댓글 보기 UI 숨김
+                commentBox.find('.data-box').hide()
+
+                // 댓글 수정 UI 추가
+                let editBox = `<div class="top">
+                                    <div class="item">
+                                        <input type="text" id="input-update-writer" value="${writer}">
+                                    </div>
+                                    <div class="item">
+                                        
+                                    </div>
+                                </div>
+                                <div class="bottom">
+                                    <textarea id="input-update-content" cols="40" rows="5">${content}</textarea>
+                                    <div class="etc-box">
+                                        <a href="javascript:;" id="btn-comment-update" class="btn btn-sm" data="${commentNo}">수정</a>
+                                        <a href="javascript:;" id="btn-comment-delete" class="btn btn-sm" >취소</a>
+                                    </div>
+                                </div>
+                                `
+
+                commentBox.find('.edit-box').html(editBox)
+
+
+                // 취소 버튼 클릭
+                $('#btn-comment-delete').on('click', function() {
+                    $('.comment-box .data-box').show()
+                    $('.comment-box .edit-box').empty()
+                })
+
+
+                // 수정 버튼 클릭
+                $('#btn-comment-update').on('click', function() {
+                    let url = 'http://192.168.30.119:8080/api/comment'
+
+                    let data = {
+                        commentNo : commentNo,
+                        writer : $('#input-update-writer').val(),
+                        content : $('#input-update-content').val(),
+                    }
+
+                    $.ajax({
+                        url : url,
+                        type : 'put',
+                        data : JSON.stringify(data),
+                        contentType : 'application/json',
+                        success : function(response) {
+                            let result = response
+
+                            if( result == 'SUCCESS' ) {
+                                alert('댓글 수정이 완료되었습니다.')
+                                // 댓글 목록 갱신
+                                getCommentList()
+
+                            }
+                        },
+                        error : function(error) {
+
+                        }
+                    })
+
+
+                })
+
+
+            })
+
+
+            // 댓글 [삭제] 버튼 클릭 이벤트
+            $('.btn-comment-delete').on('click', function() {
+
+                let check = confirm('정말로 삭제하시겠습니까?')
+                if( !check )
+                    return
+
+                let commentNo = $(this).attr('data')
+
+                const url = 'http://192.168.30.119:8080/api/comment'
+                let data = {
+                    commentNo : commentNo
+                }
+
+                $.ajax({
+                    url : url,
+                    type : 'delete',
+                    data : JSON.stringify(data),
+                    contentType : 'application/json',
+                    success : function(response) {
+                        let result = response
+
+                        if( result == 'SUCCESS' ) {
+                            alert('댓글 삭제가 완료되었습니다.')
+                            // 댓글 목록 갱신
+                            getCommentList()
+                        }
+                    },
+                    error : function(error) {
+
+                    }
+                })
+
+            })
+
+
+            // 댓글 [답글] 클릭 이벤트
+            $('.btn-reply').on('click', function() {
+
+                // 댓글 수정 상태를 초기화
+                $('.data-box').show()
+                $('.edit-box').empty()
+
+                // 부모 댓글 번호
+                let superNo = $(this).attr('data')
+
+                // 답글 작성 UI 추가
+                let replyBox = `<div class="comment-box reply-box">
+                                    <div class="edit-box">
+                                        <div class="top">
+                                            <div class="item">
+                                                <input type="text" id="input-reply-writer" placeholder="작성자">
+                                            </div>
+                                            <div class="item">
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="bottom">
+                                            <textarea id="input-reply-content" cols="40" rows="5" placeholder="댓글을 입력해주세요"></textarea>
+                                            <div class="etc-box">
+                                                <a href="javascript:;" id="btn-reply-insert" class="btn btn-sm">등록</a>
+                                                <a href="javascript:;" id="btn-reply-cancel" class="btn btn-sm">취소</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                `
+
+                let btn = $(this)
+                let commentBox = btn.parents('.comment-box')
+                $('.reply-box').remove()                // 답글 입력 상자 초기화
+                commentBox.after( $(replyBox) )
+
+
+                // 답글 [등록] 버튼 클릭 이벤트
+                $('#btn-reply-insert').on('click', function() {
+
+                    let url = 'http://192.168.30.119:8080/api/comment/reply'
+
+                    let data = {
+                        superNo : superNo,                          // 부모 댓글번호
+                        writer : $('#input-reply-writer').val(),     
+                        content : $('#input-reply-content').val(), 
+                    }
+
+                    $.ajax({
+                        url : url,
+                        type : 'post',
+                        data : JSON.stringify(data),
+                        contentType : 'application/json',
+                        success : function(response) {
+                            let result = response
+
+                            if( result == 'SUCCESS' ) {
+                                alert('답글 등록이 완료되었습니다.')
+                                // 댓글 목록 갱신
+                                getCommentList()
+                            }
+                        },
+                        error : function(error) {
+
+                        }
+                    })
+
+
+                })
+
+
+                // 댓글 [답글] 취소 버튼 클릭 이벤트
+                $('#btn-reply-cancel').on('click', function() {
+                    $('.reply-box').remove()
+                })
+
+            })
+
+        }
+ 
+
+        // 댓글 등록
+        function insertComment( writer, content ) {
+
+            const url = 'http://192.168.30.119:8080/api/comment'
+
+            let data = {
+                'parentNo'   : galleryNo,
+                'writer'    : writer,
+                'content'   : content,
+            }
+
+            $.ajax({
+                url : url,
+                type : 'post',
+                data : JSON.stringify(data),
+                contentType : 'application/json',
+                success : function(response) {
+                    let result = response
+
+                    if( result == 'SUCCESS' ) {
+                        alert('댓글 등록이 완료되었습니다.')
+                        // 댓글 목록 갱신
+                        getCommentList()
+
+                        // 작성한 댓글 입력내용 초기화
+                        $('#comment-writer').val('')
+                        $('#comment-content').val('')
+
+                    }
+                },
+                error : function(error) {
+
+                }
+            })
+        }
+
+        // 갤러리 조회
+        function getGallery() {
+
+            const url = 'http://192.168.30.119:8080/api/gallery?galleryNo=' + galleryNo
+            let fileUrl = 'http://192.168.30.119:8080/api/file'
+            $.ajax({
+                url : url,
+                type : 'get',
+                success : function(response) {
+                    let gallery = response
+
+                    console.log(gallery)
+
+                    let img = `<img src="${fileUrl}/img?fileNo=${gallery.fileNo}" >`                // 썸네일
+                    let down = `<a href="${fileUrl}/${gallery.fileNo}">${gallery.title}</a>`        // 썸네일 다운로드
+                    $('#gallery-img').html(img)
+                    $('#file-info').html(down)
+                    $('#title').val(gallery.title)
+                    $('#writer').val(gallery.writer)
+                    // $('#content').html(gallery.content)
+                    // summernote 에디터에 기존 내용을 가져오기
+                    $('#content').summernote('code', gallery.content)
+
+                },
+                error : function(error) {
+
+                }
+            })
+        }
+
+
+        // 파일 목록 조회
+        function getFileList() {
+
+            const url = 'http://192.168.30.119:8080/api/gallery/file?galleryNo=' + galleryNo
+
+            $.ajax({
+                url : url,
+                type : 'get',
+                success : function(response) {
+                    let fileList = response
+                    console.log(fileList)
+
+                    let fileListData = ''
+                    let fileUrl = 'http://192.168.30.119:8080/api/file'
+                    for (let i = 0; i < fileList.length; i++) {
+                        let fileNo = fileList[i].fileNo
+                        let fileName = fileList[i].fileName     // UID_강아지.png
+                        let originName = fileList[i].originName // 원본파일명
+                        let filePath = fileList[i].filePath
+
+                        let li = `<li>
+                                    <p>
+                                        <img src="${fileUrl}/img?fileNo=${fileNo}" width="240" />
+                                    </p>
+                                    <span>${originName}</span>
+                                    <a href="${fileUrl}/${fileNo}">[다운로드]</a>
+                                    <a href="javascript:;" onclick="deleteFile(this)" data="${fileNo}">[삭제]</a>
+                                  </li>  
+                                 `
+                        fileListData += li
+                    }
+
+                    $('#file-list').html(fileListData)
+
+                },
+                error : function(error) {
+
+                }
+            })
+        }
+
+        // 파일 삭제 
+        function deleteFile(e) {
+
+            // [확인] -> true -> 삭제
+            // [취소] -> false -> 삭제 안 함
+            let check = confirm('정말로 삭제하시겠습니까?')
+            if( !check ) {
+                return
+            }
+
+            let fileNo = $(e).attr('data')
+
+            // 삭제 요청
+            const url = 'http://192.168.30.119:8080/api/file'
+
+            let data = {
+                fileNo : fileNo
+            }
+
+            $.ajax({
+                url : url,
+                type : 'DELETE',
+                data : data,
+                success : function(response) {
+
+                    if( response == 'SUCCESS' ) {
+                        getFileList()       // 파일 목록 갱신
+                    }
+                    
+                },
+                error : function(error) {
+
+                }
+            })
+
+        }
+
+
+        // 삭제 버튼 - 클릭 이벤트
+        $('.btn-delete').on('click', function() {
+
+            // confirm('출력 메시지')
+            // [확인] --> true
+            // [취소] --> false
+            let check = confirm('정말로 삭제하시겠습니까?')
+            // [취소] 클릭 시, 삭제요청X
+            if( !check )
+                return
+
+            // 삭제 요청
+            const url = 'http://192.168.30.119:8080/api/gallery'
+            let data = {
+                'galleryNo' : galleryNo
+            }
+
+            $.ajax({
+                url : url,
+                type : 'delete',
+                data : data,
+                success : function(response) {
+                    // alert(response)
+                    if( response == 'SUCCESS' ) {
+                        // 목록 페이지로 이동
+                        location.href = 'list.html'
+                    }
+                    
+                },
+                error : function(error) {
+
+                }
+            })
+
+        })
+
+        // 수정 버튼 - 클릭 이벤트
+        $('.btn-update').on('click', function() {
+
+            // 수정 요청
+            let formData = new FormData()       // 폼 데이터 객체
+
+            let title = $('#title').val()
+            let writer = $('#writer').val()
+            let content = $('#content').val()
+
+            // 파일 입력 가져오기
+            let file = $('#file')[0]
+            let files = file.files
+            // console.log('file ----------------------------');
+            // console.log($('#file'));
+
+            formData.append('galleryNo', galleryNo)
+            formData.append('title', title)
+            formData.append('writer', writer)
+            formData.append('content', content)
+
+            // 파일 데이터 추가
+            for (let i = 0; i < files.length; i++) {
+                formData.append('file[]', files[i])
+            }
+
+            // 썸네일 파일 formData 추가
+            if( fileList != null )
+                formData.append("thumbnail[]", fileList[0])   // 썸네일 1개
+
+            let url = 'http://192.168.30.119:8080/api/gallery'
+            $.ajax({
+                url             :   url,
+                type            :   'PUT',
+                data            :   formData,
+                contentType     :   false,
+                processData     :   false,      // 데이터 컨텐츠 타입 자동 변환 여부
+                                                // 기본값(true) 
+                                                // true  -> contentType  : application/x-www-form-urlencoded
+                                                // false -> contentType  : 데이터를 자동으로 처리하지 않고 직접 지정
+                success         : function(response) {
+                    if( response == 'SUCCESS' ){
+                        alert('수정이 완료되었습니다.')
+                        // 목록 페이지로 이동
+                        location.href = 'list.html'
+                    }
+                },
+                error           : function(request, status, error){
+                    alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                }
+
+            })
+
+
+           
+
+        })
+
+        // 댓글 등록 버튼 - 클릭 이벤트
+        $('#btn-comment-insert').on('click', function() {
+
+            let writer = $('#comment-writer').val()
+            let content = $('#comment-content').val()
+
+            // 유효성 검사 - 추후작성
+
+            insertComment( writer, content )
+
+
+        })
+
+
+    </script>
+
+    <script>
+
+        let fileList = null
+
+        // 드랍존에 이미지를 올렸을 때
+        $('.dropzone').on('dragover', function(e) {
+            e.preventDefault() // 이벤트의 기본 액션 방지
+
+            $(this).addClass('over')
+        })
+
+        // 드랍존에 이미지를 벗어날 때
+        $('.dropzone').on('dragleave', function(e) {
+            e.preventDefault() // 이벤트의 기본 액션 방지
+
+            $(this).removeClass('over')
+        })
+
+        // 드랍존에 이미지를 놓았을 때
+        $('.dropzone').on('drop', function(e) {
+            e.preventDefault() // 이벤트의 기본 액션 방지
+            $(this).removeClass('over')
+            
+            console.log(e);
+
+            fileList = e.originalEvent.dataTransfer.files
+
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList[i];
+
+                let reader = new FileReader()
+
+                // 파일 로드 시
+                reader.onload = function(event) {
+                    let source =  event.target.result   // 파일 데이터
+                    let img = `<img src="${source}" >`
+                    $('.btn-thumb-remove').show()               // 삭제 버튼 보여주기
+                    $('.drop-img .img-box').show().html(img)    // 이미지 보여주기
+                    $('.drop-img .upload-box').hide()           // 업로드 영역 숨김
+
+                }
+                reader.readAsDataURL(file)
+            }
+
+        })
+
+        // 썸네일 삭제 - 클릭 이벤트
+        $('.btn-thumb-remove').on('click', function() {
+            $('#thumbnail').val(null)       // 등록 파일정보 제거
+            $('.upload-box').show()         // 업로드 영역 보여주기
+            $('.img-box').empty().hide()    // 썸네일 숨김
+            $('.btn-thumb-remove').hide()   // 삭제 버튼 숨김
+        })
+
+        // 파일 변경 이벤트
+        $('#thumbnail').on('change', function(e) {
+            fileList = e.target.files       // 변경된 파일 목록
+
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList[i];
+
+                let reader = new FileReader() 
+
+                // 파일 로드 시
+                reader.onload = function(event) {
+                    let source =  event.target.result   // 파일 데이터
+                    let img = `<img src="${source}" >`
+                    $('.btn-thumb-remove').show()
+                    $('.drop-img .img-box').show().html(img)
+                    $('.drop-img .upload-box').hide()
+                }
+                
+                reader.readAsDataURL(file)
+            }
+        })
+
+    </script>
+</body>
+</html>

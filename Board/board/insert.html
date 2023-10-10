@@ -12,7 +12,7 @@
     <aside id="sidebar">
         <div class="top flex main-end">
             <a href="javascript:;" id="btn-close">
-                <span>close</span>
+                <span class="material-symbols-outlined">close</span>
             </a>
         </div>
         <ul>
@@ -30,10 +30,18 @@
         <!-- 메인 메뉴 -->
         <div class="menu">
             <nav>
-                <ul>
+                <ul class="pc">
                     <li><a href="../index.html">Home</a></li>
                     <li><a href="../board/list.html">Board</a></li>
                     <li><a href="../gallery/list.html">Gallery</a></li>
+                </ul>
+                <ul class="mobile">
+                    <li>
+                        <a href="../index.html"><span class="material-symbols-outlined">home</span></a>
+                    </li>
+                    <li>
+                        <a href="javascript:;" id="btn-menu"><span class="material-symbols-outlined">menu</span></a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -84,7 +92,7 @@
                     </div>
                     <div class="item">
                         <a href="javascript:;" class="btn" id="btn-insert">등록</a>
-                        <input type="submit" class="btn" value="등록">
+                        <!-- <input type="submit" class="btn" value="등록"> -->
                     </div>
                 </div>
             </form>
@@ -93,6 +101,10 @@
 
     <!-- script -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="../js/main.js"></script>
 
     <script>
@@ -107,33 +119,23 @@
             let title = $('#title').val()
             let writer = $('#writer').val()
             let content = $('#content').val()
-
-            // 파일 입력 가져오기
-            let file = $('#file')[0]
-            let files = file.files
-            // console.log('file ----------------------------');
-            // console.log($('#file'));
-
+            
             formData.append('title', title)
             formData.append('writer', writer)
             formData.append('content', content)
-
+            
+            // 파일 입력 가져오기
+            let file = $('#file')[0]
+            let files = file.files
             // 파일 데이터 추가
             for (let i = 0; i < files.length; i++) {
                 formData.append('file[]', files[i])
             }
 
-
-            let data = {
-                'title' : title,
-                'writer' : writer,
-                'content' : content,
-            }
-
             let url = 'http://192.168.30.119:8080/api/board'
             $.ajax({
                 url             :   url,
-                type            :   'GET',
+                type            :   'POST',
                 data            :   formData,
                 contentType     :   false,
                 processData     :   false,      // 데이터 컨텐츠 타입 자동 변환 여부
@@ -142,13 +144,26 @@
                                                 // false -> contentType  : 데이터를 자동으로 처리하지 않고 직접 지정
                 success         : function(response) {
                     if( response == 'SUCCESS' ){
-                        alert('등록이 완료되었습니다.')
-                        // 목록 페이지로 이동
-                        location.href = 'list.html'
+                        // alert('등록이 완료되었습니다.')
+                        Swal.fire(
+                            '완료!',
+                            '등록이 완료되었습니다.',
+                            'success'
+                        ).then((result) => {
+                            if( result.isConfirmed ) {
+                                // 목록 페이지로 이동
+                                location.href = 'list.html'
+                            }
+                        })
                     }
                 },
                 error           : function(request, status, error){
-                    alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    // alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    Swal.fire(
+                        '에러!',
+                        'code:' + request.status,
+                        'error'
+                    )
                 }
 
             })
